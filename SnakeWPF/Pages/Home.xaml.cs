@@ -48,6 +48,7 @@ namespace SnakeWPF.Pages
             _mainWindow.viewModelUserSettings.Port = port.Text;
             _mainWindow.viewModelUserSettings.Name = name.Text;
             MainWindow.Send("/start|" + JsonConvert.SerializeObject(_mainWindow.viewModelUserSettings));
+
         }
     }
 }
