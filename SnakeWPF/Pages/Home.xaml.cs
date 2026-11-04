@@ -44,7 +44,7 @@ namespace SnakeWPF.Pages
             }
 
             _mainWindow.StartReceiver();
-            _mainWindow.viewModelUserSettings.IPAdress = ip.Text;
+            _mainWindow.viewModelUserSettings.IPAddress = ip.Text;
             _mainWindow.viewModelUserSettings.Port = port.Text;
             _mainWindow.viewModelUserSettings.Name = name.Text;
             MainWindow.Send("/start|" + JsonConvert.SerializeObject(_mainWindow.viewModelUserSettings));
