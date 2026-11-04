@@ -19,36 +19,38 @@ namespace SnakeWPF.Pages
 
         private void StartGame(object sender, RoutedEventArgs e)
         {
-            if (_mainWindow == null) return;
-
-            if (_mainWindow.receivingUdpClient != null)
-                _mainWindow.receivingUdpClient.Close();
-
-            if (_mainWindow.tRec != null)
-                _mainWindow.tRec.Abort();
-
-            IPAddress UserIPAddress;
-
-            if (!IPAddress.TryParse(ip.Text, out UserIPAddress))
+            if (_mainWindow == null)
             {
-                MessageBox.Show("Please use the IP address in the format X.X.X.X.");
-                return;
-            }
+                _mainWindow = MainWindow.mainWindow;
+            }    
 
-            int UserPort;
-
-            if (!int.TryParse(port.Text, out UserPort))
-            {
-                MessageBox.Show("Please use the port as a number.");
-                return;
-            }
-
-            _mainWindow.StartReceiver();
             _mainWindow.viewModelUserSettings.IPAddress = ip.Text;
             _mainWindow.viewModelUserSettings.Port = port.Text;
             _mainWindow.viewModelUserSettings.Name = name.Text;
-            MainWindow.Send("/start|" + JsonConvert.SerializeObject(_mainWindow.viewModelUserSettings));
 
+            if (!IPAddress.TryParse(_mainWindow.viewModelUserSettings.IPAddress, out _))
+            {
+                MessageBox.Show("Неверный формат IP адреса. Используйте формат X.X.X.X");
+                return;
+            }
+            if (!int.TryParse(_mainWindow.viewModelUserSettings.Port, out _))
+            {
+                MessageBox.Show("Порт должен быть числом.");
+                return;
+            }
+
+            if (_mainWindow.receivingUdpClient != null)
+            {
+                _mainWindow.receivingUdpClient.Close();
+            }
+            if (_mainWindow.tRec != null && _mainWindow.tRec.IsAlive)
+            {
+                _mainWindow.tRec.Join(100);
+            }
+
+            _mainWindow.StartReceiver();
+
+            MainWindow.Send("/start|" + Newtonsoft.Json.JsonConvert.SerializeObject(_mainWindow.viewModelUserSettings));
         }
     }
 }

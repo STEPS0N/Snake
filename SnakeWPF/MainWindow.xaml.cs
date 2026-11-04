@@ -73,7 +73,10 @@ namespace SnakeWPF
 
         public void Receiver()
         {
-            receivingUdpClient = new UdpClient(int.Parse(viewModelUserSettings.Port));
+            receivingUdpClient = new UdpClient();
+            receivingUdpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            receivingUdpClient.Client.Bind(new IPEndPoint(IPAddress.Any, int.Parse(viewModelUserSettings.Port)));
+
             IPEndPoint RemouteIpEndPoint = null;
 
             try
@@ -93,6 +96,11 @@ namespace SnakeWPF
                     }
 
                     ViewModelGames = JsonConvert.DeserializeObject<ViewModelGames>(returnData.ToString());
+
+                    if (ViewModelGames == null || ViewModelGames.SnakesPlayers == null)
+                    {
+                        continue;
+                    }
 
                     if (ViewModelGames.SnakesPlayers.GameOver)
                     {
