@@ -212,10 +212,12 @@ namespace Snake
                     if (Snake.Points[0].X <= 0 || Snake.Points[0].X >= 793)
                     {
                         Snake.GameOver = true;
+                        Send();
                     }
                     else if (Snake.Points[0].Y <= 0 || Snake.Points[0].Y >= 420)
                     {
                         Snake.GameOver = true;
+                        Send();
                     }
 
                     if (Snake.direction != Snakes.Direction.Start)
@@ -227,6 +229,7 @@ namespace Snake
                                 if (Snake.Points[0].Y >= Snake.Points[i].Y - 1 && Snake.Points[0].Y <= Snake.Points[i].Y + 1)
                                 {
                                     Snake.GameOver = true;
+                                    Send();
                                     break;
                                 }
                             }
@@ -239,9 +242,9 @@ namespace Snake
                         if (Snake.Points[0].Y >= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.Y - 15 &&
                             Snake.Points[0].Y <= viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points.Y + 15)
                         {
-                            viewModelGames.Find(x => x.IdSnake == User.IdSnake).Points = new Snakes.Point(
-                                new Random().Next(10, 783),
-                                new Random().Next(10, 410));
+                            var currentGame = viewModelGames.Find(x => x.IdSnake == User.IdSnake);
+
+                            currentGame.Points = new Snakes.Point(new Random().Next(10, 783), new Random().Next(10, 410));
                             Snake.Points.Add(new Snakes.Point()
                             {
                                 X = Snake.Points[Snake.Points.Count - 1].X,
