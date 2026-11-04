@@ -21,6 +21,7 @@ namespace Snake
         public static List<ViewModelGames> viewModelGames = new List<ViewModelGames>();
         private static int localPort = 5001;
         public static int MaxSpeed = 15;
+        public static int nextSnakeId = 0;
 
         static void Main(string[] args)
         {
@@ -97,7 +98,8 @@ namespace Snake
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine($"Подключился пользователь: {viewModelUserSettings.IPAddress}:{viewModelUserSettings.Port}");
                         remoteIPAddress.Add(viewModelUserSettings);
-                        viewModelUserSettings.IdSnake = AddSnake();
+                        viewModelUserSettings.IdSnake = nextSnakeId++;
+                        AddSnake(viewModelUserSettings.IdSnake);
                         viewModelGames[viewModelUserSettings.IdSnake].IdSnake = viewModelUserSettings.IdSnake;
                     }
                     else
@@ -111,18 +113,20 @@ namespace Snake
 
                         if (IdPlayer != -1)
                         {
-                            if (dataMessage[0] == "Up" &&
-                                viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Down)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Up;
-                            else if (dataMessage[0] == "Down" &&
-                                viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Up)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Down;
-                            else if (dataMessage[0] == "Left" &&
-                                viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Right)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Left;
-                            else if (dataMessage[0] == "Right" &&
-                                viewModelGames[IdPlayer].SnakesPlayers.direction != Snakes.Direction.Left)
-                                viewModelGames[IdPlayer].SnakesPlayers.direction = Snakes.Direction.Right;
+                            int snakeId = remoteIPAddress[IdPlayer].IdSnake;
+                            var playerGame = viewModelGames.Find(x => x.IdSnake == snakeId);
+
+                            if (playerGame != null)
+                            {
+                                if (dataMessage[0] == "Up" && playerGame.SnakesPlayers.direction != Snakes.Direction.Down)
+                                    playerGame.SnakesPlayers.direction = Snakes.Direction.Up;
+                                else if (dataMessage[0] == "Down" && playerGame.SnakesPlayers.direction != Snakes.Direction.Up)
+                                    playerGame.SnakesPlayers.direction = Snakes.Direction.Down;
+                                else if (dataMessage[0] == "Left" && playerGame.SnakesPlayers.direction != Snakes.Direction.Right)
+                                    playerGame.SnakesPlayers.direction = Snakes.Direction.Left;
+                                else if (dataMessage[0] == "Right" && playerGame.SnakesPlayers.direction != Snakes.Direction.Left)
+                                    playerGame.SnakesPlayers.direction = Snakes.Direction.Right;
+                            }
                         }
                     }
                 }
@@ -134,7 +138,7 @@ namespace Snake
             }
         }
 
-        public static int AddSnake()
+        public static void AddSnake(int id)
         {
             ViewModelGames viewModelGamesPlayer = new ViewModelGames();
             viewModelGamesPlayer.SnakesPlayers = new Snakes()
@@ -144,11 +148,11 @@ namespace Snake
                     new Snakes.Point() { X = 20, Y = 10 },
                     new Snakes.Point() { X = 10, Y = 10 },
                 },
-                direction = Snakes.Direction.Start
+                direction = Snakes.Direction.Right
             };
             viewModelGamesPlayer.Points = new Snakes.Point(new Random().Next(10, 783), new Random().Next(10, 410));
+            viewModelGamesPlayer.IdSnake = id;
             viewModelGames.Add(viewModelGamesPlayer);
-            return viewModelGames.FindIndex(x => x == viewModelGamesPlayer);
         }
 
         public static void Timer()
