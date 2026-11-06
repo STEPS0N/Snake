@@ -31,6 +31,7 @@ namespace Common
             Start
         }
 
+        public int IdSnake { get; set; }
         public List<Point> Points = new List<Point>();
         public Direction direction = Direction.Start;
         public bool GameOver = false;

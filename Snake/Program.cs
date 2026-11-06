@@ -6,10 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Snake
 {
@@ -52,6 +50,11 @@ namespace Snake
                 {
                     var gameData = viewModelGames.Find(x => x.IdSnake == User.IdSnake);
                     if (gameData == null) continue;
+
+                    gameData.AllSnakes = viewModelGames
+                        .Where(x => !x.SnakesPlayers.GameOver)
+                        .Select(x => x.SnakesPlayers)
+                        .ToList();
 
                     byte[] bytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(gameData));
 
@@ -143,6 +146,7 @@ namespace Snake
             ViewModelGames viewModelGamesPlayer = new ViewModelGames();
             viewModelGamesPlayer.SnakesPlayers = new Snakes()
             {
+                IdSnake = id,
                 Points = new List<Snakes.Point>() {
                     new Snakes.Point() { X = 30, Y = 10 },
                     new Snakes.Point() { X = 20, Y = 10 },

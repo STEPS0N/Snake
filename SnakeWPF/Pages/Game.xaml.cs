@@ -22,6 +22,25 @@ namespace SnakeWPF.Pages
     public partial class Game : Page
     {
         public int StepCadr = 0;
+
+        private readonly Color[] headColors = new Color[] {
+            Color.FromArgb(255, 0, 127, 14),  
+            Color.FromArgb(255, 255, 0, 0),   
+            Color.FromArgb(255, 0, 0, 255),   
+            Color.FromArgb(255, 255, 165, 0), 
+            Color.FromArgb(255, 128, 0, 128), 
+            Color.FromArgb(255, 0, 255, 255)  
+        };
+
+        private readonly Color[] bodyColors = new Color[] {
+            Color.FromArgb(255, 0, 198, 19),   
+            Color.FromArgb(255, 255, 100, 100),
+            Color.FromArgb(255, 100, 100, 255),
+            Color.FromArgb(255, 255, 200, 100),
+            Color.FromArgb(255, 200, 100, 200),
+            Color.FromArgb(255, 100, 255, 255) 
+        };
+
         public Game()
         {
             InitializeComponent();
@@ -34,66 +53,53 @@ namespace SnakeWPF.Pages
                 if (StepCadr == 0) StepCadr = 1;
                 else StepCadr = 0;
                 canvas.Children.Clear();
-                for (int iPoint = MainWindow.mainWindow.ViewModelGames.SnakesPlayers.Points.Count - 1; iPoint >= 0; iPoint--)
+                var allSnakes = MainWindow.mainWindow.ViewModelGames.AllSnakes;
+                if (allSnakes == null) return;
+
+                foreach (var snake in allSnakes)
                 {
-                    Snakes.Point SnakePoint = MainWindow.mainWindow.ViewModelGames.SnakesPlayers.Points[iPoint];
+                    int colorIndex = Math.Abs(snake.IdSnake) % headColors.Length;
+                    Brush currentHeadColor = new SolidColorBrush(headColors[colorIndex]);
+                    Brush currentBodyColor = new SolidColorBrush(bodyColors[colorIndex]);
 
-                    if (iPoint != 0)
+                    for (int iPoint = snake.Points.Count - 1; iPoint >= 0; iPoint--)
                     {
-                        Snakes.Point NextSnakePoint = MainWindow.mainWindow.ViewModelGames.SnakesPlayers.Points[iPoint - 1];
-                        if (SnakePoint.X > NextSnakePoint.X || SnakePoint.X < NextSnakePoint.X)
+                        int drawX = snake.Points[iPoint].X;
+                        int drawY = snake.Points[iPoint].Y;
+
+                        if (iPoint != 0)
                         {
-                            if (iPoint % 2 == 0)
+                            int nextX = snake.Points[iPoint - 1].X;
+                            int nextY = snake.Points[iPoint - 1].Y;
+
+                            if (drawX > nextX || drawX < nextX)
                             {
-                                if (StepCadr % 2 == 0)
-                                    SnakePoint.Y -= 1;
-                                else
-                                    SnakePoint.Y += 1;
+                                if (iPoint % 2 == 0) drawY += (StepCadr % 2 == 0) ? -1 : 1;
+                                else drawY += (StepCadr % 2 == 0) ? 1 : -1;
                             }
-                            else
+                            else if (drawY > nextY || drawY < nextY)
                             {
-                                if (StepCadr % 2 == 0)
-                                    SnakePoint.Y += 1;
-                                else
-                                    SnakePoint.Y -= 1;
+                                if (iPoint % 2 == 0) drawX += (StepCadr % 2 == 0) ? -1 : 1;
+                                else drawX += (StepCadr % 2 == 0) ? 1 : -1;
                             }
                         }
-                        else if (SnakePoint.Y > NextSnakePoint.Y || SnakePoint.Y < NextSnakePoint.Y)
+
+                        Brush fillColor = (iPoint == 0) ? currentHeadColor : currentBodyColor;
+
+                        Ellipse ellipse = new Ellipse()
                         {
-                            if (iPoint % 2 == 0)
-                            {
-                                if (StepCadr % 2 == 0)
-                                    SnakePoint.X -= 1;
-                                else
-                                    SnakePoint.X += 1;
-                            }
-                            else
-                            {
-                                if (StepCadr % 2 == 0)
-                                    SnakePoint.X += 1;
-                                else
-                                    SnakePoint.X -= 1;
-                            }
-                        }
+                            Width = 20,
+                            Height = 20,
+                            Margin = new Thickness(drawX - 10, drawY - 10, 0, 0),
+                            Fill = fillColor,
+                            Stroke = Brushes.Black
+                        };
+                        canvas.Children.Add(ellipse);
                     }
-                    Brush Color;
-                    if (iPoint == 0)
-                        Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 127, 14));
-                    else
-                        Color = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 0, 198, 19));
-
-                    Ellipse ellipse = new Ellipse()
-                    {
-                        Width = 20,
-                        Height = 20,
-                        Margin = new Thickness(SnakePoint.X - 10, SnakePoint.Y - 10, 0, 0),
-                        Fill = Color,
-                        Stroke = Brushes.Black
-                    };
-                    canvas.Children.Add(ellipse);
                 }
+
                 ImageBrush myBrush = new ImageBrush();
-                myBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\user\\Desktop\\флэшка\\4 курс\\Ощепков\\пр 3\\Snake\\SnakeWPF\\Image\\apple.png", UriKind.Relative));
+                myBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\msi\\source\\repos\\Zmeya\\SnakeWPF\\Image\\apple.png", UriKind.Relative));
                 Ellipse points = new Ellipse()
                 {
                     Width = 40,
